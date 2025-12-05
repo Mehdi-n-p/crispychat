@@ -249,7 +249,7 @@ const handleKick = async (userId) => {
             gap: $spacing-md;
             svg {
                 padding-top: 5px;
-                transform: scale(1.3);
+                transform: scale(1.5);
             }
         }
         .toggle-users-btn {
