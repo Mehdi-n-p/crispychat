@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <div v-if="show" class="snackbar" :class="[color, { show: show }]" :timeout="timeout">
+        <div v-if="show" class="snackbar" :class="[color, { show: show }]">
             <div class="snackbar-message" data-test-id="snackbar-message">
                 <span v-html="message" />
             </div>
@@ -13,27 +13,32 @@
 import { useSnackbarStore } from '@/stores/snackbar'
 const snackbarStore = useSnackbarStore()
 
-const settledTimeout = ref(null)
 const message = computed(() => snackbarStore.getMessage)
 const color = computed(() => snackbarStore.getColor)
-const timeout = computed(() => snackbarStore.getTimeout)
 const show = computed(() => snackbarStore.getShow)
 
-watch(
-    () => show.value,
-    (v) => {
-        if (settledTimeout.value !== null) {
-            clearTimeout(settledTimeout.value)
-            settledTimeout.value = null
-        }
+let timeoutId = null
 
-        if (v) {
-            settledTimeout.value = setTimeout(() => {
-                close()
-            }, timeout.value)
+const startAutoClose = () => {
+    if (timeoutId) {
+        clearTimeout(timeoutId)
+    }
+    timeoutId = setTimeout(() => {
+        snackbarStore.hideSnackbar()
+        timeoutId = null
+    }, 3000)
+}
+
+watch(show, (isVisible) => {
+    if (isVisible) {
+        startAutoClose()
+    } else {
+        if (timeoutId) {
+            clearTimeout(timeoutId)
+            timeoutId = null
         }
     }
-)
+})
 
 const route = useRoute()
 watch(
@@ -46,15 +51,15 @@ watch(
 )
 
 onBeforeUnmount(() => {
-    if (settledTimeout.value !== null) {
-        clearTimeout(settledTimeout.value)
+    if (timeoutId) {
+        clearTimeout(timeoutId)
     }
 })
 
 const close = () => {
-    if (settledTimeout.value !== null) {
-        clearTimeout(settledTimeout.value)
-        settledTimeout.value = null
+    if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
     }
     snackbarStore.hideSnackbar()
 }

@@ -197,8 +197,14 @@ const addNewMessage = async () => {
         newMessage.value
     )
     if (messageData?.success) {
+        const messageExists = chatroom.value?.messages?.some(
+            (msg) => msg.id === messageData?.message?.id
+        )
+        if (!messageExists && messageData?.message) {
+            chatroom.value?.messages?.push(messageData?.message)
+            scrollToBottom()
+        }
         newMessage.value = ''
-        console.log('Message posted successfully, waiting for Realtime update')
     }
 }
 

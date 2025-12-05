@@ -188,36 +188,55 @@ export const useChatrooms = () => {
             return
         }
 
+        if (!chatroomId) {
+            console.warn('Cannot subscribe to messages: chatroomId is missing')
+            return
+        }
+
         if (messagesChannel) {
             unsubscribeFromMessages()
         }
 
+        const chatroomIdNum = typeof chatroomId === 'string' ? parseInt(chatroomId) : chatroomId
+
         messagesChannel = supabase
-            .channel(`messages:${chatroomId}`)
+            .channel(`messages:${chatroomId}`, {
+                config: {
+                    broadcast: { self: false },
+                },
+            })
             .on(
                 'postgres_changes',
                 {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `chatroom_id=eq.${chatroomId}`,
+                    filter: `chatroom_id=eq.${chatroomIdNum}`,
                 },
                 (payload) => {
-                    console.log('New message received via Realtime:', payload)
+                    console.log('📨 New message received via Realtime:', payload)
                     if (onNewMessage && payload.new) {
                         onNewMessage(payload.new)
                     }
                 }
             )
-            .subscribe((status) => {
+            .subscribe((status, err) => {
                 if (status === 'SUBSCRIBED') {
-                    console.log(`Subscribed to messages for chatroom ${chatroomId}`)
+                    console.log(`✅ Successfully subscribed to messages for chatroom ${chatroomId}`)
                 } else if (status === 'CHANNEL_ERROR') {
-                    console.error(`Error subscribing to messages for chatroom ${chatroomId}`)
+                    console.error(
+                        `❌ Error subscribing to messages for chatroom ${chatroomId}:`,
+                        err
+                    )
+                    console.error(
+                        '💡 Vérifiez que les publications Realtime sont activées pour la table "messages" dans Supabase'
+                    )
                 } else if (status === 'TIMED_OUT') {
-                    console.warn(`Timeout subscribing to messages for chatroom ${chatroomId}`)
+                    console.warn(`⏱️ Timeout subscribing to messages for chatroom ${chatroomId}`)
                 } else if (status === 'CLOSED') {
-                    console.log(`Channel closed for chatroom ${chatroomId}`)
+                    console.log(`🔒 Channel closed for chatroom ${chatroomId}`)
+                } else {
+                    console.log(`📡 Channel status: ${status} for chatroom ${chatroomId}`)
                 }
             })
 

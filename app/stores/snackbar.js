@@ -5,7 +5,7 @@ export const useSnackbarStore = defineStore('snackbar', () => {
     const show = ref(false)
     const color = ref('')
     const message = ref('')
-    const timeout = ref(2000)
+    const timeout = ref(3000)
     const canBeClosed = ref(true)
 
     const getShow = computed(() => show.value)
@@ -21,7 +21,7 @@ export const useSnackbarStore = defineStore('snackbar', () => {
     function showSnackbar(param) {
         color.value = param.color
         message.value = param.message
-        timeout.value = param.timeout || 2000
+        timeout.value = param.timeout || 3000
         show.value = true
         canBeClosed.value = param.canBeClosed
     }
