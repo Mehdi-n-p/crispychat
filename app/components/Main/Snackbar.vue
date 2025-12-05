@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <div v-if="show" class="snackbar" :class="[color, { show: show }]">
+        <div v-if="show" class="snackbar" :class="[color, { show: show }]" :timeout="timeout">
             <div class="snackbar-message" data-test-id="snackbar-message">
                 <span v-html="message" />
             </div>
@@ -13,55 +13,33 @@
 import { useSnackbarStore } from '@/stores/snackbar'
 const snackbarStore = useSnackbarStore()
 
+const settledTimeout = ref(null)
 const message = computed(() => snackbarStore.getMessage)
 const color = computed(() => snackbarStore.getColor)
+const timeout = computed(() => snackbarStore.getTimeout)
 const show = computed(() => snackbarStore.getShow)
+// const canBeClosed = computed(() => snackbarStore.getCanBeClosed)
 
-let timeoutId = null
-
-const startAutoClose = () => {
-    if (timeoutId) {
-        clearTimeout(timeoutId)
-    }
-    timeoutId = setTimeout(() => {
-        snackbarStore.hideSnackbar()
-        timeoutId = null
-    }, 3000)
-}
-
-watch(show, (isVisible) => {
-    if (isVisible) {
-        startAutoClose()
-    } else {
-        if (timeoutId) {
-            clearTimeout(timeoutId)
-            timeoutId = null
-        }
-    }
-})
-
-const route = useRoute()
 watch(
-    () => route.path,
-    () => {
-        if (show.value) {
-            close()
+    () => show.value,
+    (v) => {
+        if (v) {
+            settledTimeout.value = setTimeout(() => {
+                close()
+            }, timeout.value)
         }
     }
 )
 
 onBeforeUnmount(() => {
-    if (timeoutId) {
-        clearTimeout(timeoutId)
+    if (settledTimeout.value !== null) {
+        clearTimeout(settledTimeout.value)
     }
 })
 
 const close = () => {
-    if (timeoutId) {
-        clearTimeout(timeoutId)
-        timeoutId = null
-    }
     snackbarStore.hideSnackbar()
+    clearTimeout(settledTimeout.value)
 }
 </script>
 
@@ -75,7 +53,7 @@ const close = () => {
     display: flex;
     align-items: center;
 
-    padding: $spacing-md;
+    padding: $spacing-xs $spacing-md;
     border-radius: $spacing-xs;
 
     @media (max-width: $mq-md) {
@@ -90,10 +68,10 @@ const close = () => {
     }
 
     &.success {
-        background-color: #46c2a5;
+        background-color: rgb(0, 128, 105);
     }
     &.error {
-        background-color: #fb5a5a;
+        background-color: #ff4848;
     }
 
     &-icon:hover {

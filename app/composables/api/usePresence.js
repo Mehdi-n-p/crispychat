@@ -18,41 +18,21 @@ export const usePresence = () => {
     const currentUserIsAdmin = ref(false)
 
     const subscribeToPresence = (chatroomId) => {
-        if (process.server) {
-            console.warn('Cannot subscribe to presence: server-side')
-            return
-        }
+        if (!chatroomId) return
 
         const supabase = getSupabaseClient()
-        if (!supabase) {
-            console.warn('Cannot subscribe to presence: supabase not available')
-            return
-        }
-
-        currentChatroomId = chatroomId
-        if (!chatroomId) {
-            console.warn('Cannot subscribe to presence: chatroomId is missing')
-            return
-        }
+        if (!supabase) return
 
         if (channel) {
             unsubscribeFromPresence()
         }
 
+        currentChatroomId = chatroomId
+
         const userId = user.isLoggedIn ? user.id : user.AnonymousUser?.id
         const userName = user.isLoggedIn ? user.displayName : user.AnonymousUser?.name
 
-        if (!userId || !userName) {
-            console.warn(
-                'Cannot subscribe to presence: user info missing. Waiting for user initialization...'
-            )
-            if (!user.isInitialized) {
-                setTimeout(() => {
-                    subscribeToPresence(chatroomId)
-                }, 500)
-            }
-            return
-        }
+        if (!userId || !userName) return
 
         channel = supabase.channel(`chatroom:${chatroomId}`, {
             config: {
@@ -145,7 +125,7 @@ export const usePresence = () => {
                         snackbarStore.showSnackbar({
                             message: 'You have been kicked from the chatroom',
                             color: 'error',
-                            timeout: 3000,
+                            timeout: 2000,
                         })
                         setTimeout(() => {
                             navigateTo('/')

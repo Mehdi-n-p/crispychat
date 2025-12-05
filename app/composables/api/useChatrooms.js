@@ -175,6 +175,7 @@ export const useChatrooms = () => {
         return { success: true, data: newChatUser }
     }
     let messagesChannel = null
+    let currentChatroomId = null
 
     const subscribeToMessages = (chatroomId, onNewMessage) => {
         if (process.server) {
@@ -193,12 +194,20 @@ export const useChatrooms = () => {
             return
         }
 
+        // Si on s'abonne déjà au même chatroom, ne rien faire
+        if (messagesChannel && currentChatroomId === chatroomId) {
+            console.log(`Already subscribed to messages for chatroom ${chatroomId}`)
+            return messagesChannel
+        }
+
+        // Nettoyer l'ancienne souscription si elle existe
         if (messagesChannel) {
             unsubscribeFromMessages()
         }
 
-        const chatroomIdNum = typeof chatroomId === 'string' ? parseInt(chatroomId) : chatroomId
+        currentChatroomId = chatroomId
 
+        // Utiliser directement l'UUID (pas de conversion en nombre)
         messagesChannel = supabase
             .channel(`messages:${chatroomId}`, {
                 config: {
@@ -211,7 +220,7 @@ export const useChatrooms = () => {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `chatroom_id=eq.${chatroomIdNum}`,
+                    filter: `chatroom_id=eq.${chatroomId}`,
                 },
                 (payload) => {
                     console.log('📨 New message received via Realtime:', payload)
@@ -250,6 +259,7 @@ export const useChatrooms = () => {
                 await supabase.removeChannel(messagesChannel)
             }
             messagesChannel = null
+            currentChatroomId = null
         }
     }
 

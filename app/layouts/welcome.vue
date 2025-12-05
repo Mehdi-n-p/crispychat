@@ -7,7 +7,6 @@
         </section>
     </div>
 </template>
-
 <style lang="scss" scoped>
 .welcome-layout {
     min-height: 100vh;
