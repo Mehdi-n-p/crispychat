@@ -150,14 +150,20 @@ onMounted(async () => {
             subscribeToPresence(chatroom.value?.id)
 
             subscribeToMessages(chatroom.value?.id, (newMessage) => {
+                console.log('Callback subscribeToMessages called with:', newMessage)
                 if (chatroom.value?.messages) {
                     const messageExists = chatroom.value.messages.some(
                         (msg) => msg.id === newMessage.id
                     )
                     if (!messageExists) {
+                        console.log('Adding new message to chatroom:', newMessage)
                         chatroom.value.messages.push(newMessage)
                         scrollToBottom()
+                    } else {
+                        console.log('Message already exists, skipping:', newMessage.id)
                     }
+                } else {
+                    console.warn('chatroom.value?.messages is not defined')
                 }
             })
 
@@ -191,9 +197,8 @@ const addNewMessage = async () => {
         newMessage.value
     )
     if (messageData?.success) {
-        chatroom.value?.messages?.push(messageData?.message)
         newMessage.value = ''
-        scrollToBottom()
+        console.log('Message posted successfully, waiting for Realtime update')
     }
 }
 

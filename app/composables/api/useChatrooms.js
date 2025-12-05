@@ -203,12 +203,23 @@ export const useChatrooms = () => {
                     filter: `chatroom_id=eq.${chatroomId}`,
                 },
                 (payload) => {
+                    console.log('New message received via Realtime:', payload)
                     if (onNewMessage && payload.new) {
                         onNewMessage(payload.new)
                     }
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log(`Subscribed to messages for chatroom ${chatroomId}`)
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error(`Error subscribing to messages for chatroom ${chatroomId}`)
+                } else if (status === 'TIMED_OUT') {
+                    console.warn(`Timeout subscribing to messages for chatroom ${chatroomId}`)
+                } else if (status === 'CLOSED') {
+                    console.log(`Channel closed for chatroom ${chatroomId}`)
+                }
+            })
 
         return messagesChannel
     }

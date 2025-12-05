@@ -22,10 +22,25 @@ const show = computed(() => snackbarStore.getShow)
 watch(
     () => show.value,
     (v) => {
+        if (settledTimeout.value !== null) {
+            clearTimeout(settledTimeout.value)
+            settledTimeout.value = null
+        }
+
         if (v) {
             settledTimeout.value = setTimeout(() => {
                 close()
             }, timeout.value)
+        }
+    }
+)
+
+const route = useRoute()
+watch(
+    () => route.path,
+    () => {
+        if (show.value) {
+            close()
         }
     }
 )
@@ -37,8 +52,11 @@ onBeforeUnmount(() => {
 })
 
 const close = () => {
+    if (settledTimeout.value !== null) {
+        clearTimeout(settledTimeout.value)
+        settledTimeout.value = null
+    }
     snackbarStore.hideSnackbar()
-    clearTimeout(settledTimeout.value)
 }
 </script>
 
@@ -52,7 +70,7 @@ const close = () => {
     display: flex;
     align-items: center;
 
-    padding: $spacing-xs $spacing-md;
+    padding: $spacing-md;
     border-radius: $spacing-xs;
 
     @media (max-width: $mq-md) {
@@ -67,10 +85,10 @@ const close = () => {
     }
 
     &.success {
-        background-color: green;
+        background-color: #46c2a5;
     }
     &.error {
-        background-color: red;
+        background-color: #fb5a5a;
     }
 
     &-icon:hover {
