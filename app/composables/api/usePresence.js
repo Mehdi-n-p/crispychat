@@ -126,7 +126,7 @@ export const usePresence = () => {
                             snackbarStore.showSnackbar({
                                 message: 'You have been kicked from the chatroom',
                                 color: 'error',
-                                timeout: 2000,
+                                timeout: 3000,
                             })
                         })
                     }
