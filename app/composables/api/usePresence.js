@@ -122,14 +122,13 @@ export const usePresence = () => {
                 const currentUserId = user.isLoggedIn ? user.id : user.AnonymousUser?.id
                 if (payload.userId === currentUserId) {
                     if (process.client) {
-                        snackbarStore.showSnackbar({
-                            message: 'You have been kicked from the chatroom',
-                            color: 'error',
-                            timeout: 2000,
+                        navigateTo('/').then(() => {
+                            snackbarStore.showSnackbar({
+                                message: 'You have been kicked from the chatroom',
+                                color: 'error',
+                                timeout: 2000,
+                            })
                         })
-                        setTimeout(() => {
-                            navigateTo('/')
-                        }, 500)
                     }
                 }
             })
