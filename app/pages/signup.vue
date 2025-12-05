@@ -93,7 +93,17 @@ const signUp = async () => {
         await userStore.setUser(authData.user)
 
         setTimeout(() => {
-            router.push('/')
+            const route = useRoute()
+            const redirectTo = route.query.redirect
+            if (redirectTo) {
+                router.push(redirectTo)
+            } else {
+                if (window.history.length > 1) {
+                    router.back()
+                } else {
+                    router.push('/')
+                }
+            }
         }, 1000)
     } catch (err) {
         console.error('Unexpected error:', err)

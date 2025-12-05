@@ -92,7 +92,6 @@ export const useUserStore = defineStore('userStore', () => {
             } = await supabase.auth.getSession()
 
             if (session?.user) {
-                console.log('Session found, user connected:', session.user)
                 await setUser(session.user)
             } else {
                 console.log('No session active')
@@ -164,7 +163,7 @@ export const useUserStore = defineStore('userStore', () => {
         }
 
         const { error } = await supabase.auth.signOut()
-        if (error) console.log(error)
+        if (error) console.error(error)
         else user.value = null
     }
 

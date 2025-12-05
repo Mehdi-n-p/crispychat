@@ -174,9 +174,60 @@ export const useChatrooms = () => {
 
         return { success: true, data: newChatUser }
     }
+    let messagesChannel = null
+
+    const subscribeToMessages = (chatroomId, onNewMessage) => {
+        if (process.server) {
+            console.warn('Cannot subscribe to messages: server-side')
+            return
+        }
+
+        const supabase = getSupabaseClient()
+        if (!supabase) {
+            console.warn('Cannot subscribe to messages: supabase not available')
+            return
+        }
+
+        if (messagesChannel) {
+            unsubscribeFromMessages()
+        }
+
+        messagesChannel = supabase
+            .channel(`messages:${chatroomId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `chatroom_id=eq.${chatroomId}`,
+                },
+                (payload) => {
+                    if (onNewMessage && payload.new) {
+                        onNewMessage(payload.new)
+                    }
+                }
+            )
+            .subscribe()
+
+        return messagesChannel
+    }
+
+    const unsubscribeFromMessages = async () => {
+        if (messagesChannel) {
+            const supabase = getSupabaseClient()
+            if (supabase) {
+                await supabase.removeChannel(messagesChannel)
+            }
+            messagesChannel = null
+        }
+    }
+
     return {
         getChatroom,
         addMessage,
         addChatUser,
+        subscribeToMessages,
+        unsubscribeFromMessages,
     }
 }

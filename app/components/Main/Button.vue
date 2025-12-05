@@ -34,5 +34,9 @@ defineProps({
     color: $background-color-primary;
     cursor: pointer;
     font-size: pxToRem(14px);
+    transition: opacity 0.2s ease-in-out;
+    &:hover {
+        opacity: 0.7;
+    }
 }
 </style>

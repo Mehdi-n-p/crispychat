@@ -45,7 +45,17 @@ const login = async () => {
             errorMessage.value = error.message
         } else {
             await userStore.setUser(data.user)
-            router.push('/')
+            const route = useRoute()
+            const redirectTo = route.query.redirect
+            if (redirectTo) {
+                router.push(redirectTo)
+            } else {
+                if (window.history.length > 1) {
+                    router.back()
+                } else {
+                    router.push('/')
+                }
+            }
         }
     } catch (err) {
         console.error('Unexpected error:', err)

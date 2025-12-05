@@ -40,7 +40,7 @@ export const usePresence = () => {
         }
 
         const userId = user.isLoggedIn ? user.id : user.AnonymousUser?.id
-        const userName = user.isLoggedIn ? user.user?.full_name : user.AnonymousUser?.name
+        const userName = user.isLoggedIn ? user.displayName : user.AnonymousUser?.name
 
         if (!userId || !userName) {
             console.warn(
@@ -133,11 +133,9 @@ export const usePresence = () => {
                 updateConnectedUsers()
             })
             .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-                console.log('User joined:', newPresences)
                 updateConnectedUsers()
             })
             .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-                console.log('User left:', leftPresences)
                 updateConnectedUsers()
             })
             .on('broadcast', { event: 'kick' }, ({ payload }) => {

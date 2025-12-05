@@ -88,9 +88,13 @@ const goToChatroom = async () => {
     button.button-with-icon {
         border: none;
         border-left: 1px solid $color-border-grey;
+        border-radius: 0 $border-radius-md $border-radius-md 0;
         background-color: transparent;
-        border-radius: 0;
         width: 100px;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+            background-color: #010203;
+        }
         svg {
             padding-top: 1px;
         }

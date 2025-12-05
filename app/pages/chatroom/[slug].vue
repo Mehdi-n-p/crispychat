@@ -112,7 +112,8 @@ import { useUserStore } from '@/stores/user'
 import { getFirstLetterOfName } from '@/utils'
 const user = useUserStore()
 const route = useRoute()
-const { getChatroom, addMessage, addChatUser } = useChatrooms()
+const { getChatroom, addMessage, addChatUser, subscribeToMessages, unsubscribeFromMessages } =
+    useChatrooms()
 const {
     connectedUsers,
     currentUserIsAdmin,
@@ -139,7 +140,6 @@ onMounted(async () => {
         const chatroomData = await getChatroom(route?.params?.slug)
         if (chatroomData?.success) {
             chatroom.value = chatroomData?.data
-            console.log(chatroom.value)
             if (!user.isInitialized) {
                 await user.initUser()
             }
@@ -148,6 +148,18 @@ onMounted(async () => {
             await addChatUser(chatroom.value?.id, authUserId, anonymousName)
 
             subscribeToPresence(chatroom.value?.id)
+
+            subscribeToMessages(chatroom.value?.id, (newMessage) => {
+                if (chatroom.value?.messages) {
+                    const messageExists = chatroom.value.messages.some(
+                        (msg) => msg.id === newMessage.id
+                    )
+                    if (!messageExists) {
+                        chatroom.value.messages.push(newMessage)
+                        scrollToBottom()
+                    }
+                }
+            })
 
             scrollToBottom()
         }
@@ -158,6 +170,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
     unsubscribeFromPresence()
+    unsubscribeFromMessages()
 })
 
 watch(
@@ -187,7 +200,6 @@ const addNewMessage = async () => {
 const handleKick = async (userId) => {
     const result = await kickUser(userId)
     if (result?.success) {
-        console.log('User kicked successfully')
     } else {
         console.error('Error kicking user:', result?.error)
     }
@@ -214,7 +226,7 @@ const handleKick = async (userId) => {
         top: 0;
         left: 0;
         right: 0;
-        z-index: 1000;
+        z-index: 10;
         gap: $spacing-md;
         padding: $spacing-md;
         border-bottom: 1px solid $color-border-grey;
@@ -463,6 +475,10 @@ const handleKick = async (userId) => {
             background-color: #5e2bff;
             border-radius: $border-radius-md;
             cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            &:hover {
+                background-color: #451f9d;
+            }
             &:disabled {
                 background-color: $color-border-grey;
                 cursor: not-allowed;
