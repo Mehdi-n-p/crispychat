@@ -1,8 +1,21 @@
 export const useChatrooms = () => {
-    const supabase = useSupabaseClient()
     const user = useUserStore()
 
+    const getSupabaseClient = () => {
+        if (process.server) return null
+        try {
+            return useSupabaseClient()
+        } catch (error) {
+            console.error('Error getting Supabase client:', error)
+            return null
+        }
+    }
+
     const getChatroom = async (slug, creation = false) => {
+        const supabase = getSupabaseClient()
+        if (!supabase) {
+            return { success: false, error: 'Supabase client not available' }
+        }
         const { data, error } = await supabase.from('chatrooms').select('*').eq('name', slug)
 
         if (error) {
@@ -39,6 +52,11 @@ export const useChatrooms = () => {
         }
         if (anonymousName) {
             orConditions.push(`anonymous_name.eq.${anonymousName}`)
+        }
+
+        const supabase = getSupabaseClient()
+        if (!supabase) {
+            return { success: false, error: 'Supabase client not available' }
         }
 
         let query = supabase.from('chat_users').select('id').eq('chatroom_id', chatroomId)
@@ -80,6 +98,11 @@ export const useChatrooms = () => {
     }
 
     const addChatUser = async (chatroomId, authUserId, anonymousName) => {
+        const supabase = getSupabaseClient()
+        if (!supabase) {
+            return { success: false, error: 'Supabase client not available' }
+        }
+
         let existingChatUser = null
         let existingChatUserError = null
 

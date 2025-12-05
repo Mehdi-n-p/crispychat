@@ -1,7 +1,16 @@
 export const usePresence = () => {
-    const supabase = useSupabaseClient()
     const user = useUserStore()
     const snackbarStore = useSnackbarStore()
+
+    const getSupabaseClient = () => {
+        if (process.server) return null
+        try {
+            return useSupabaseClient()
+        } catch (error) {
+            console.error('Error getting Supabase client:', error)
+            return null
+        }
+    }
 
     let channel = null
     const connectedUsers = ref([])
@@ -9,6 +18,17 @@ export const usePresence = () => {
     const currentUserIsAdmin = ref(false)
 
     const subscribeToPresence = (chatroomId) => {
+        if (process.server) {
+            console.warn('Cannot subscribe to presence: server-side')
+            return
+        }
+
+        const supabase = getSupabaseClient()
+        if (!supabase) {
+            console.warn('Cannot subscribe to presence: supabase not available')
+            return
+        }
+
         currentChatroomId = chatroomId
         if (!chatroomId) {
             console.warn('Cannot subscribe to presence: chatroomId is missing')
@@ -63,6 +83,9 @@ export const usePresence = () => {
 
             if (users.length > 0 && currentChatroomId) {
                 try {
+                    const supabase = getSupabaseClient()
+                    if (!supabase) return
+
                     const { data: chatUsers, error } = await supabase
                         .from('chat_users')
                         .select('id, auth_user_id, anonymous_name, is_admin')
@@ -168,8 +191,11 @@ export const usePresence = () => {
 
     const unsubscribeFromPresence = async () => {
         if (channel) {
-            await channel.untrack()
-            await supabase.removeChannel(channel)
+            const supabase = getSupabaseClient()
+            if (supabase) {
+                await channel.untrack()
+                await supabase.removeChannel(channel)
+            }
             channel = null
             connectedUsers.value = []
             currentChatroomId = null
