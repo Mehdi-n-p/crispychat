@@ -1,0 +1,39 @@
+/*Global variables*/
+$header-height: 80px;
+$header-height-xs: 160px;
+
+/*Media queries*/
+$mq-xxs: 320px;
+$mq-xs: 576px;
+$mq-sm: 768px;
+$mq-md: 1023px;
+
+/*Spacings*/
+$spacing-xxxs: 2px;
+$spacing-xxs: 3px;
+$spacing-xs: 5px;
+$spacing-sm: 10px;
+$spacing-md: 20px;
+$spacing-lg: 30px;
+$spacing-xl: 40px;
+$spacing-xxl: 50px;
+$spacing-xxxl: 60px;
+
+/*Colors*/
+$background-color-primary: #03091b;
+$content-color-primary: #091022;
+$content-color-secondary: #0d1832;
+$input-color: #0a1126;
+$color-text-primary: #ffffff;
+$color-text-secondary: #74829a;
+$color-border-grey: #1c293c;
+$color-border-grey-dark: #192436;
+
+/*Border radius*/
+$border-radius-sm: 3px;
+$border-radius-md: 8px;
+$border-radius-lg: 15px;
+
+/*Transitions*/
+$transition-fade: opacity 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+$standard-transform: transform 0.2s ease-in-out;

@@ -1,75 +1,69 @@
-# Nuxt Minimal Starter
+# Crispy Chat
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A brief chat application built with Nuxt.js and Supabase.
 
-## Setup
+## Prerequisites
 
-Make sure to install dependencies:
+-   **Node.js** (version 18.x or higher)
+-   **npm**, **yarn**, **pnpm**, or **bun** package manager
+
+## Installation
+
+### 1. Clone the repository
 
 ```bash
-# npm
+git clone https://github.com/mehdi-n-p/crispychat.git
+cd crispy-chat
+```
+
+### 2. Install dependencies
+
+```bash
+# Using npm
 npm install
 
-# pnpm
+# Using pnpm
 pnpm install
 
-# yarn
+# Using yarn
 yarn install
 
-# bun
+# Using bun
 bun install
 ```
 
-## Development Server
+### 3. Environment Variables
 
-Start the development server on `http://localhost:3000`:
+Create a `.env` file in the root directory and add your Supabase credentials
+(Sent by email)
+
+```env
+SUPABASE_URL=supabase_project_url
+SUPABASE_KEY=supabase_anon_key
+```
+
+### 4. Run the development server
 
 ```bash
-# npm
+# Using npm
 npm run dev
 
-# pnpm
+# Using pnpm
 pnpm dev
 
-# yarn
+# Using yarn
 yarn dev
 
-# bun
+# Using bun
 bun run dev
 ```
 
-## Production
+Application will be available at `http://localhost:3000`
 
-Build the application for production:
+## Technologies
 
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+-   **Nuxt.js 4** - Vue.js framework
+-   **Vue 3** - Progressive JavaScript framework
+-   **Supabase** - Backend
+-   **Pinia** - State management
+-   **SCSS** - CSS preprocessor
