@@ -178,36 +178,21 @@ export const useChatrooms = () => {
     let currentChatroomId = null
 
     const subscribeToMessages = (chatroomId, onNewMessage) => {
-        if (process.server) {
-            console.warn('Cannot subscribe to messages: server-side')
-            return
-        }
+        if (!chatroomId) return
 
         const supabase = getSupabaseClient()
-        if (!supabase) {
-            console.warn('Cannot subscribe to messages: supabase not available')
-            return
-        }
+        if (!supabase) return
 
-        if (!chatroomId) {
-            console.warn('Cannot subscribe to messages: chatroomId is missing')
-            return
-        }
-
-        // Si on s'abonne déjà au même chatroom, ne rien faire
         if (messagesChannel && currentChatroomId === chatroomId) {
-            console.log(`Already subscribed to messages for chatroom ${chatroomId}`)
             return messagesChannel
         }
 
-        // Nettoyer l'ancienne souscription si elle existe
         if (messagesChannel) {
             unsubscribeFromMessages()
         }
 
         currentChatroomId = chatroomId
 
-        // Utiliser directement l'UUID (pas de conversion en nombre)
         messagesChannel = supabase
             .channel(`messages:${chatroomId}`, {
                 config: {
@@ -223,7 +208,6 @@ export const useChatrooms = () => {
                     filter: `chatroom_id=eq.${chatroomId}`,
                 },
                 (payload) => {
-                    console.log('📨 New message received via Realtime:', payload)
                     if (onNewMessage && payload.new) {
                         onNewMessage(payload.new)
                     }
@@ -231,21 +215,14 @@ export const useChatrooms = () => {
             )
             .subscribe((status, err) => {
                 if (status === 'SUBSCRIBED') {
-                    console.log(`✅ Successfully subscribed to messages for chatroom ${chatroomId}`)
                 } else if (status === 'CHANNEL_ERROR') {
-                    console.error(
-                        `❌ Error subscribing to messages for chatroom ${chatroomId}:`,
-                        err
-                    )
-                    console.error(
-                        '💡 Vérifiez que les publications Realtime sont activées pour la table "messages" dans Supabase'
-                    )
+                    console.error(`Error subscribing to messages for chatroom ${chatroomId}:`, err)
                 } else if (status === 'TIMED_OUT') {
-                    console.warn(`⏱️ Timeout subscribing to messages for chatroom ${chatroomId}`)
+                    console.warn(`Timeout subscribing to messages for chatroom ${chatroomId}`)
                 } else if (status === 'CLOSED') {
-                    console.log(`🔒 Channel closed for chatroom ${chatroomId}`)
+                    console.log(`Channel closed for chatroom ${chatroomId}`)
                 } else {
-                    console.log(`📡 Channel status: ${status} for chatroom ${chatroomId}`)
+                    console.log(`Channel status: ${status} for chatroom ${chatroomId}`)
                 }
             })
 
